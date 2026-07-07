@@ -1,6 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import { toNodeHandler } from 'better-auth/node'
+import { auth } from './auth'
 
 dotenv.config()
 
@@ -14,6 +16,9 @@ app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
 }))
+// ── Better Auth ─────────────────────────────────────────
+// One line handles ALL auth routes automatically
+app.all('/api/auth/*splat', toNodeHandler(auth))
 
 // ── Health Check ────────────────────────────────────────
 app.get('/health', (req, res) => {
@@ -28,6 +33,7 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`)
     console.log(`📋 Health check: http://localhost:${PORT}/health`)
+    console.log(`🔐 Auth: http://localhost:${PORT}/api/auth`)
 })
 
 export default app
