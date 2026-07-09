@@ -2,7 +2,10 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import { toNodeHandler } from 'better-auth/node'
+import * as trpcExpress from '@trpc/server/adapters/express'
 import { auth } from './auth'
+import { appRouter } from './trpc/router'
+import { createContext } from './trpc/context'
 
 dotenv.config()
 
@@ -16,9 +19,18 @@ app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
 }))
+
 // ── Better Auth ─────────────────────────────────────────
-// One line handles ALL auth routes automatically
 app.all('/api/auth/*splat', toNodeHandler(auth))
+
+// ── tRPC Router Middleware ──────────────────────────────
+app.use(
+    '/api/trpc',
+    trpcExpress.createExpressMiddleware({
+        router: appRouter,
+        createContext,
+    })
+)
 
 // ── Health Check ────────────────────────────────────────
 app.get('/health', (req, res) => {
