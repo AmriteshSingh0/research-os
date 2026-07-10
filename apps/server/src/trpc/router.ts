@@ -4,7 +4,7 @@ import { db } from '../database'
 import { researchSessions, researchSteps, reports, sources } from '../database/schema'
 import { eq, desc } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
-import { runResearch } from '../agents/researcher'
+import { researchGraph } from '../agents/researchGraph'
 
 export const appRouter = router({
     hello: publicProcedure
@@ -27,7 +27,19 @@ export const appRouter = router({
             })
 
             // Run research in background (don't await)
-            runResearch(sessionId, input.query)
+            // Run LangGraph workflow in the background (don't await)
+            researchGraph.invoke({
+                sessionId,
+                query: input.query,
+                subQuestions: [],
+                sources: [],
+                findings: [],
+                draftReport: '',
+                finalReport: '',
+            }).catch(err => {
+                console.error('LangGraph research failed:', err)
+            })
+
 
             return { sessionId }
         }),
