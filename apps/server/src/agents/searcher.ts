@@ -19,6 +19,7 @@ export async function searcherNode(state: ResearchStateType) {
 
     for (const question of state.subQuestions) {
         await logStep(state.sessionId, 'searching', `Searching: "${question}"`)
+        console.log(`[ResearchOS] [SEARCHER] Calling Tavily API for: "${question}"...`)
 
         try {
             const response = await fetch('https://api.tavily.com/search', {
@@ -35,7 +36,7 @@ export async function searcherNode(state: ResearchStateType) {
                 })))
             }
         } catch (e) {
-            console.error(e)
+            console.error(`[ResearchOS] [SEARCHER] ❌ Tavily API failed for "${question}":`, e)
         }
     }
 

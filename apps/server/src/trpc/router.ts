@@ -19,6 +19,8 @@ export const appRouter = router({
         .mutation(async ({ ctx, input }) => {
             const sessionId = randomUUID()
 
+            console.log(`\n[ResearchOS] 📥 [tRPC] New research query received: "${input.query}" (Session: ${sessionId})`)
+
             await db.insert(researchSessions).values({
                 id: sessionId,
                 userId: ctx.user.id,

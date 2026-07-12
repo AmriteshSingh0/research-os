@@ -1,23 +1,20 @@
 'use client'
 
-import { useSession, signOut } from '@/lib/auth-client'
+import { useSession } from '@/lib/auth-client'
 import { trpc } from '@/lib/trpc'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import Sidebar from '@/components/Sidebar'
 
 export default function DashboardPage() {
     const { data: session, isPending } = useSession()
     const router = useRouter()
     const [query, setQuery] = useState('')
 
-    // tRPC hooks
     const startResearch = trpc.startResearch.useMutation({
         onSuccess: (data) => {
             router.push(`/research/${data.sessionId}`)
         },
-    })
-    const sessions = trpc.getSessions.useQuery(undefined, {
-        enabled: !!session, // Only fetch if logged in
     })
 
     useEffect(() => {
@@ -28,184 +25,133 @@ export default function DashboardPage() {
 
     if (isPending) {
         return (
-            <div style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: '#0a0a0a',
-                color: '#fff',
-                fontFamily: 'system-ui, sans-serif',
-            }}>
-                Loading...
+            <div className="min-h-screen flex items-center justify-center bg-[#050505] text-white font-sans">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-8 h-8 border-2 border-white/10 border-t-indigo-500 rounded-full animate-spin" />
+                    <span className="text-sm text-zinc-500 tracking-wider">LOADING PROFILE...</span>
+                </div>
             </div>
         )
     }
 
     if (!session) return null
 
-    const handleResearch = () => {
-        if (query.trim().length < 3) return
-        startResearch.mutate({ query: query.trim() })
+    const handleResearch = (searchQuery = query) => {
+        const trimmed = searchQuery.trim()
+        if (trimmed.length < 3) return
+        startResearch.mutate({ query: trimmed })
     }
 
+    const suggestions = [
+        { title: "Space Exploration", query: "Latest discoveries from the James Webb Space Telescope in 2025" },
+        { title: "Battery Tech", query: "Current state of solid-state battery technology for EVs" },
+        { title: "Gene Editing", query: "Recent breakthroughs in CRISPR gene editing for human diseases" }
+    ]
+
+    // Generate 45 twinkling stars
+    const stars = useMemo(() => {
+        const colors = ['#818cf8', '#a78bfa', '#c084fc', '#e879f9', '#f472b6']
+        return Array.from({ length: 45 }, (_, i) => ({
+            id: i,
+            x: Math.random() * 100,
+            y: Math.random() * 100,
+            size: Math.random() * 2 + 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            delay: Math.random() * 4,
+            duration: 1.5 + Math.random() * 1.5,
+        }))
+    }, [])
+
     return (
-        <div style={{
-            minHeight: '100vh',
-            background: '#0a0a0a',
-            color: '#fff',
-            fontFamily: 'system-ui, sans-serif',
-        }}>
-            {/* Top Nav */}
-            <nav style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '16px 32px',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-            }}>
-                <h1 style={{ fontSize: '20px', fontWeight: '700' }}>🔬 ResearchOS</h1>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>
-                        {session.user.email}
-                    </span>
-                    <button
-                        onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push('/login') } })}
-                        style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            border: '1px solid rgba(255,255,255,0.15)',
-                            background: 'rgba(255,255,255,0.05)',
-                            color: '#fff',
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        Sign Out
-                    </button>
-                </div>
-            </nav>
+        <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans flex">
 
-            {/* Main Content */}
-            <main style={{
-                maxWidth: '800px',
-                margin: '0 auto',
-                padding: '60px 32px',
-                textAlign: 'center',
-            }}>
-                <h2 style={{
-                    fontSize: '36px',
-                    fontWeight: '700',
-                    marginBottom: '16px',
-                }}>
-                    Welcome, {session.user.name} 👋
-                </h2>
-                <p style={{
-                    fontSize: '16px',
-                    color: 'rgba(255,255,255,0.5)',
-                    marginBottom: '48px',
-                }}>
-                    Start a deep research session powered by AI agents
-                </p>
+            <Sidebar />
 
-                {/* Research Input */}
-                <div style={{
-                    display: 'flex',
-                    gap: '12px',
-                    maxWidth: '600px',
-                    margin: '0 auto 48px',
-                }}>
-                    <input
-                        type="text"
-                        placeholder="What would you like to research?"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleResearch()}
+            {/* ─── MAIN CONTENT AREA ─────────────────────────────────── */}
+            <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 mx-auto h-screen overflow-y-auto relative">
+
+                {/* Twinkling Stars */}
+                {stars.map((star) => (
+                    <div
+                        key={star.id}
+                        className="absolute rounded-full pointer-events-none"
                         style={{
-                            flex: 1,
-                            padding: '14px 20px',
-                            borderRadius: '12px',
-                            border: '1px solid rgba(255,255,255,0.15)',
-                            background: 'rgba(255,255,255,0.05)',
-                            color: '#fff',
-                            fontSize: '15px',
-                            outline: 'none',
+                            left: `${star.x}%`,
+                            top: `${star.y}%`,
+                            width: `${star.size}px`,
+                            height: `${star.size}px`,
+                            backgroundColor: star.color,
+                            animation: `twinkle ${star.duration}s ease-in-out ${star.delay}s infinite`,
+                            opacity: 0,
                         }}
                     />
-                    <button
-                        onClick={handleResearch}
-                        disabled={startResearch.isPending || query.trim().length < 3}
-                        style={{
-                            padding: '14px 28px',
-                            borderRadius: '12px',
-                            border: 'none',
-                            background: startResearch.isPending
-                                ? 'rgba(102, 126, 234, 0.5)'
-                                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            color: '#fff',
-                            fontSize: '15px',
-                            fontWeight: '600',
-                            cursor: startResearch.isPending ? 'not-allowed' : 'pointer',
-                            opacity: query.trim().length < 3 ? 0.5 : 1,
-                        }}
-                    >
-                        {startResearch.isPending ? 'Starting...' : 'Research'}
-                    </button>
-                </div>
+                ))}
+                <style>{`
+                    @keyframes twinkle {
+                        0%, 100% { opacity: 0; transform: scale(0.5); }
+                        50% { opacity: 0.8; transform: scale(1); }
+                    }
+                `}</style>
 
-                {/* Past Sessions */}
-                {sessions.data && sessions.data.length > 0 && (
-                    <div style={{ textAlign: 'left', maxWidth: '600px', margin: '0 auto' }}>
-                        <h3 style={{
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            marginBottom: '16px',
-                            color: 'rgba(255,255,255,0.7)',
-                        }}>
-                            Recent Research
-                        </h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {sessions.data.map((s) => (
-                                <div
-                                    key={s.id}
-                                    onClick={() => router.push(`/research/${s.id}`)}
-                                    style={{
-                                        padding: '14px 18px',
-                                        borderRadius: '10px',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        background: 'rgba(255,255,255,0.03)',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        transition: 'background 0.2s',
-                                    }}
-                                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
-                                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-                                >
-                                    <span style={{ fontSize: '14px' }}>{s.query}</span>
-                                    <span style={{
-                                        fontSize: '12px',
-                                        padding: '4px 10px',
-                                        borderRadius: '6px',
-                                        background: s.status === 'completed'
-                                            ? 'rgba(52, 211, 153, 0.15)'
-                                            : s.status === 'failed'
-                                                ? 'rgba(239, 68, 68, 0.15)'
-                                                : 'rgba(102, 126, 234, 0.15)',
-                                        color: s.status === 'completed'
-                                            ? '#34d399'
-                                            : s.status === 'failed'
-                                                ? '#ef4444'
-                                                : '#667eea',
-                                    }}>
-                                        {s.status}
-                                    </span>
-                                </div>
-                            ))}
+                <div className="w-full max-w-2xl flex flex-col gap-8 sm:gap-12 text-center py-8">
+
+                    {/* Header */}
+                    <div className="flex flex-col gap-3 mt-8 md:mt-0">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            What do you want to discover?
+                        </h2>
+                        <p className="text-xs sm:text-sm text-zinc-500 max-w-lg mx-auto px-4">
+                            Deploy a multi-agent LangGraph RAG pipeline to crawl websites, index facts, and write reports.
+                        </p>
+                    </div>
+
+                    {/* Search Input */}
+                    <div className="w-full max-w-2xl mx-auto p-[1px] rounded-xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 focus-within:from-indigo-500 focus-within:to-purple-600 transition-all duration-300 shadow-2xl shadow-purple-500/5">
+                        <div className="bg-[#09090b] rounded-xl p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
+                            <input
+                                type="text"
+                                placeholder="Ask anything to start research..."
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleResearch()}
+                                className="flex-1 bg-transparent text-white text-sm outline-none placeholder-zinc-500 border-none p-2 w-full focus:ring-0 focus:outline-none"
+                            />
+                            <button
+                                onClick={() => handleResearch()}
+                                disabled={startResearch.isPending || query.trim().length < 3}
+                                className="p-2.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-30 text-white font-medium text-sm transition duration-200 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center w-10 h-10 shrink-0 shadow-lg shadow-indigo-500/20"
+                            >
+                                {startResearch.isPending ? (
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <span>→</span>
+                                )}
+                            </button>
                         </div>
                     </div>
-                )}
+
+                    {/* Suggestion Cards */}
+                    <div className="w-full max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 text-left px-2 sm:px-0">
+                        {suggestions.map((s, idx) => (
+                            <div
+                                key={idx}
+                                onClick={() => {
+                                    setQuery(s.query)
+                                    handleResearch(s.query)
+                                }}
+                                className="flex-1 bg-[#09090b] border border-white/5 hover:border-indigo-500/20 p-4 rounded-xl hover:bg-white/5 cursor-pointer transition duration-200 shadow-sm"
+                            >
+                                <h4 className="text-xs font-semibold text-indigo-400 mb-1.5 uppercase tracking-wider">
+                                    {s.title}
+                                </h4>
+                                <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                                    {s.query}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+
+                </div>
             </main>
         </div>
     )
