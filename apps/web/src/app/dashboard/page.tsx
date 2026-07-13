@@ -10,11 +10,17 @@ export default function DashboardPage() {
     const { data: session, isPending } = useSession()
     const router = useRouter()
     const [query, setQuery] = useState('')
+    const [showLimitPopup, setShowLimitPopup] = useState(false)
 
     const startResearch = trpc.startResearch.useMutation({
         onSuccess: (data) => {
             router.push(`/research/${data.sessionId}`)
         },
+        onError: (err) => {
+            if (err.message === 'LIMIT_REACHED') {
+                setShowLimitPopup(true)
+            }
+        }
     })
 
     useEffect(() => {
@@ -153,6 +159,44 @@ export default function DashboardPage() {
 
                 </div>
             </main>
+
+            {/* ─── LIMIT EXCEEDED POPUP MODAL ───────────────────────── */}
+            {showLimitPopup && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity duration-350">
+                    <div className="w-full max-w-md bg-[#09090b] border-2 border-purple-500/30 rounded-2xl p-6 sm:p-8 text-center shadow-[0_0_50px_rgba(168,85,247,0.15)] relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        {/* Glow effect background */}
+                        <div className="absolute -top-24 -left-24 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                        {/* Icon */}
+                        <div className="mx-auto w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mb-6 text-purple-400">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                        </div>
+
+                        {/* Heading */}
+                        <h3 className="text-xl font-bold text-white mb-3 tracking-wide">
+                            Limit Reached
+                        </h3>
+
+                        {/* Message content */}
+                        <p className="text-sm leading-relaxed text-purple-300/90 font-medium mb-8">
+                            Hey there! Looks like your limit has been reached (max 3 searches). Since this project is only for learning, the developer can't allow infinite searches, otherwise they would be on the streets. <span className="text-purple-400 font-bold block mt-3 tracking-wide">IF YOU LIKE IT, PLEASE OFFER THE DEVELOPER A ROLE IN YOUR ORG!</span>
+                        </p>
+
+                        {/* Got it Button */}
+                        <button
+                            onClick={() => setShowLimitPopup(false)}
+                            className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm font-semibold shadow-lg shadow-purple-500/20 hover:shadow-purple-500/35 transition duration-200 cursor-pointer"
+                        >
+                            Got it
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

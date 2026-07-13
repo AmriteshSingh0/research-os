@@ -5,6 +5,7 @@ import { researchSessions, researchSteps, reports, sources } from '../database/s
 import { eq, desc } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { researchGraph } from '../agents/researchGraph'
+import { TRPCError } from '@trpc/server'
 
 export const appRouter = router({
     hello: publicProcedure
@@ -17,6 +18,18 @@ export const appRouter = router({
     startResearch: protectedProcedure
         .input(z.object({ query: z.string().min(3) }))
         .mutation(async ({ ctx, input }) => {
+            // Count existing sessions for the logged-in user
+            const userSessionsCount = await db.select()
+                .from(researchSessions)
+                .where(eq(researchSessions.userId, ctx.user.id))
+
+            if (userSessionsCount.length >= 3) {
+                throw new TRPCError({
+                    code: 'FORBIDDEN',
+                    message: 'LIMIT_REACHED',
+                })
+            }
+
             const sessionId = randomUUID()
 
             console.log(`\n[ResearchOS] 📥 [tRPC] New research query received: "${input.query}" (Session: ${sessionId})`)
