@@ -27,5 +27,9 @@ export async function writerNode(state: ResearchStateType) {
 
     const response = await model.invoke(prompt)
     const draftReport = typeof response.content === 'string' ? response.content : ''
+    console.log("⚠️ ⚠️ the model being used is⚠️ ⚠️", model);
+    const wordCount = draftReport.trim().split(/\s+/).length;
+
+    console.log("bade bhai research ended here and the wordccount is:", wordCount);
     return { draftReport }
 }

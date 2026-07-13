@@ -157,7 +157,14 @@ export default function Sidebar({ activeSessionId }: SidebarProps) {
                             <span className="text-[10px] text-zinc-500 truncate">{session.user.email}</span>
                         </div>
                         <button
-                            onClick={() => signOut({ fetchOptions: { onSuccess: () => router.push('/login') } })}
+                            onClick={async () => {
+                                try {
+                                    await signOut({ fetchOptions: { onSuccess: () => router.push('/login') } })
+                                } catch {
+                                    // Even if sign-out API fails, redirect to login
+                                    router.push('/login')
+                                }
+                            }}
                             className="w-full py-2 px-3 rounded-lg bg-red-950/20 hover:bg-red-950/40 text-red-400 border border-red-900/20 hover:border-red-900/30 text-xs font-semibold tracking-wide transition duration-200 cursor-pointer text-center"
                         >
                             Sign Out

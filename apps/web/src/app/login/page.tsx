@@ -65,14 +65,14 @@ export default function LoginPage() {
     const handleGoogleLogin = async () => {
         await signIn.social({
             provider: 'google',
-            callbackURL: 'http://localhost:3000/dashboard',
+            callbackURL: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : 'http://localhost:3000/dashboard',
         })
     }
 
     const handleGithubLogin = async () => {
         await signIn.social({
             provider: 'github',
-            callbackURL: 'http://localhost:3000/dashboard',
+            callbackURL: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : 'http://localhost:3000/dashboard',
         })
     }
 

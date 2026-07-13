@@ -23,6 +23,20 @@ export default function DashboardPage() {
         }
     }, [session, isPending, router])
 
+    // Generate 45 twinkling stars (must be before any early returns — React Rules of Hooks)
+    const stars = useMemo(() => {
+        const colors = ['#818cf8', '#a78bfa', '#c084fc', '#e879f9', '#f472b6']
+        return Array.from({ length: 45 }, (_, i) => ({
+            id: i,
+            x: Math.random() * 100,
+            y: Math.random() * 100,
+            size: Math.random() * 2 + 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            delay: Math.random() * 4,
+            duration: 1.5 + Math.random() * 1.5,
+        }))
+    }, [])
+
     if (isPending) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#050505] text-white font-sans">
@@ -47,20 +61,6 @@ export default function DashboardPage() {
         { title: "Battery Tech", query: "Current state of solid-state battery technology for EVs" },
         { title: "Gene Editing", query: "Recent breakthroughs in CRISPR gene editing for human diseases" }
     ]
-
-    // Generate 45 twinkling stars
-    const stars = useMemo(() => {
-        const colors = ['#818cf8', '#a78bfa', '#c084fc', '#e879f9', '#f472b6']
-        return Array.from({ length: 45 }, (_, i) => ({
-            id: i,
-            x: Math.random() * 100,
-            y: Math.random() * 100,
-            size: Math.random() * 2 + 1,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            delay: Math.random() * 4,
-            duration: 1.5 + Math.random() * 1.5,
-        }))
-    }, [])
 
     return (
         <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans flex">
