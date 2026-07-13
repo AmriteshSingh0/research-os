@@ -23,7 +23,10 @@ export const appRouter = router({
                 .from(researchSessions)
                 .where(eq(researchSessions.userId, ctx.user.id))
 
-            if (userSessionsCount.length >= 3) {
+            // Check if user is the admin (amriteshsingh20030@gmail.com) to bypass limit
+            const isAdmin = ctx.user.email === 'amriteshsingh20030@gmail.com'
+
+            if (!isAdmin && userSessionsCount.length >= 3) {
                 throw new TRPCError({
                     code: 'FORBIDDEN',
                     message: 'LIMIT_REACHED',
