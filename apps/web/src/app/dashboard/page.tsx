@@ -107,7 +107,7 @@ export default function DashboardPage() {
                             What do you want to discover?
                         </h2>
                         <p className="text-xs sm:text-sm text-zinc-500 max-w-lg mx-auto px-4">
-                            Deploy a multi-agent LangGraph RAG pipeline to crawl websites, index facts, and write reports.
+                            Research any topic using AI agents that search, analyze, and generate cited reports.
                         </p>
                     </div>
 
